@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="icon" href="assets/icons/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/favicon-16x16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/apple-touch-icon.png">
+<meta name="theme-color" content="#ffffff">
+  <title>Ivy!</title>
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
+
+  <style>
+    :root { --gold-accent:#FFC72C; --pink-accent:#ec4899; }
+    body{
+      font-family:'Inter',sans-serif;
+      background:
+        radial-gradient(1200px 600px at 5% 5%, rgba(236,72,153,.12), transparent 60%),
+        radial-gradient(1000px 500px at 95% 10%, rgba(99,102,241,.12), transparent 60%),
+        linear-gradient(135deg, #f0abfc 0%, #a78bfa 100%);
+      min-height:100vh; overflow-x:hidden; padding-top:72px; padding-bottom:64px;
+    }
+    .heading-font{font-family:'Playfair Display',serif;}
+    .sparkle-text{text-shadow:0 0 10px rgba(255,255,255,1),0 0 20px rgba(255,105,180,.9);}
+    .gold-text{color:var(--gold-accent);text-shadow:0 0 5px rgba(255,215,0,1),0 0 15px rgba(255,165,0,.7);}
+
+    /* Fancy nav */
+    .glass-nav{
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(255,255,255,.65), rgba(255,255,255,.35));
+      border: 1px solid rgba(255,255,255,.6);
+      box-shadow: 0 10px 40px rgba(99,102,241,.15);
+    }
+    .nav-link{ position:relative; padding:.5rem .9rem; border-radius:9999px; transition:.25s; }
+    .nav-link:hover{ background:rgba(99,102,241,.08); }
+    .nav-link.active::after{
+      content:""; position:absolute; left:18%; right:18%; bottom:-6px; height:3px;
+      background: linear-gradient(90deg,#ec4899,#fcd34d);
+      border-radius:9999px; box-shadow:0 0 10px rgba(236,72,153,.5);
+    }
+
+    /* Scroll reveal */
+    .scroll-reveal{opacity:0; transform:translateY(40px); transition:opacity 1s ease, transform 1s ease;}
+    .scroll-reveal.is-visible{opacity:1; transform:translateY(0);}
+
+    /* Confetti hearts */
+    @keyframes float{0%{transform:translateY(0) scale(.8) rotate(0);opacity:.8}100%{transform:translateY(-100vh) scale(1.2) rotate(360deg);opacity:0}}
+    .confetti-heart{position:fixed; bottom:-50px; font-size:28px; pointer-events:none; animation:float 15s linear infinite; z-index:10;}
+
+    /* Cursor sparkles */
+    .sparkle-dot{position:absolute; width:5px; height:5px; border-radius:50%; pointer-events:none; opacity:0; animation:fadeOut .8s ease-out forwards; z-index:50;}
+    @keyframes fadeOut{0%{opacity:1; transform:scale(1)}100%{opacity:0; transform:scale(0)}}
+
+    /* Scroll progress bar */
+    #scroll-progress{position:fixed; top:0; left:0; height:4px; background:linear-gradient(90deg,#ec4899,#fcd34d); z-index:101; width:0%; box-shadow:0 0 8px rgba(255,199,44,.8)}
+
+    /* Verse card min height */
+    .verse-card{min-height:150px; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;}
+
+    /* Header glow */
+    @keyframes pulse-glow {0%,100%{filter:drop-shadow(0 0 5px rgba(255,105,180,.7))}50%{filter:drop-shadow(0 0 20px rgba(255,105,180,1))}}
+    .animate-pulse-glow{animation:pulse-glow 3s infinite ease-in-out;}
+
+    /* Carousel aspect helper (mobile 4:3, md+ 16:9) is done via Tailwind classes */
+    /* Custom scrollbar */
+    ::-webkit-scrollbar{width:12px}
+    ::-webkit-scrollbar-track{background:#fdf2f8}
+    ::-webkit-scrollbar-thumb{background:#f9a8d4; border-radius:6px; border:3px solid #fdf2f8}
+    ::-webkit-scrollbar-thumb:hover{background:#ec4899}
+
+    /* Confetti dots (for wish success) */
+    @keyframes fall { to { transform: translate(var(--x, 0px), 100vh); opacity:0; } }
+
+    /* One-line title that scales nicely */
+    .title-ivy{
+      white-space:nowrap;
+      font-size:clamp(1.75rem, 8vw, 4.75rem);
+      letter-spacing:-.02em;
+    }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <!-- Intro / Splash Gate -->
+  <div id="intro-overlay"
+       class="fixed inset-0 z-[9999] flex items-center justify-center
+              bg-gradient-to-br from-pink-200/80 via-white/95 to-indigo-200/80
+              backdrop-blur-sm transition-opacity duration-500">
+    <div class="text-center max-w-xl mx-auto px-6">
+      <div class="text-6xl mb-4">🍰</div>
+      <h2 class="heading-font text-3xl sm:text-5xl font-extrabold text-pink-700 leading-tight">
+        The best is always served last.
+      </h2>
+      <p class="mt-3 text-gray-600">The sweetest part comes last. Unwrap it?</p>
+
+      <button id="intro-explore-btn"
+              class="mt-6 inline-flex items-center gap-2 bg-pink-600 hover:bg-pink-700
+                     text-white font-bold px-8 py-3 rounded-full shadow-lg">
+        Explore ✨
+      </button>
+
+      <p class="mt-2 text-xs text-gray-500">Press Enter</p>
+    </div>
+  </div>
+
+  <!-- Scroll progress -->
+  <div id="scroll-progress"></div>
+
+  <!-- Fancy Sticky Navigation -->
+  <nav class="glass-nav fixed top-3 left-3 right-3 z-50 rounded-2xl px-3 py-2">
+    <div class="max-w-5xl mx-auto flex items-center justify-between">
+      <a href="#tab-home" class="flex items-center gap-2">
+        <div class="w-9 h-9 rounded-lg bg-gradient-to-tr from-pink-400 to-indigo-400 flex items-center justify-center text-xl">🎀</div>
+        <span class="heading-font text-lg font-extrabold text-indigo-700">Ivy • 35</span>
+      </a>
+      <!-- Desktop links -->
+      <ul class="hidden md:flex items-center gap-1 text-sm font-semibold">
+        <li><a href="#tab-home" class="nav-link text-indigo-700">Home</a></li>
+        <li><a href="#tab-messages" class="nav-link text-indigo-700">Messages</a></li>
+        <li><a href="#tab-powers" class="nav-link text-indigo-700">Superpowers</a></li>
+        <li><a href="#tab-verses" class="nav-link text-indigo-700">Daily Verse</a></li>
+        <li><a href="#tab-wishes" class="nav-link text-indigo-700">Wishes</a></li>
+        <li><a href="#tab-prayer" class="nav-link text-indigo-700">Prayer</a></li>
+      </ul>
+      <!-- Mobile hamburger -->
+      <button id="navToggle" class="md:hidden inline-flex items-center justify-center w-10 h-10 rounded-xl border border-indigo-200 text-indigo-700">
+        ☰
+      </button>
+    </div>
+    <!-- Mobile drawer -->
+    <div id="mobileDrawer" class="hidden md:hidden mt-2 px-2 pb-2">
+      <ul class="grid grid-cols-2 gap-2 text-sm font-semibold">
+        <li><a href="#tab-home" class="block nav-link bg-white/70 text-indigo-700">Home</a></li>
+        <li><a href="#tab-messages" class="block nav-link bg-white/70 text-indigo-700">Messages</a></li>
+        <li><a href="#tab-powers" class="block nav-link bg-white/70 text-indigo-700">Superpowers</a></li>
+        <li><a href="#tab-verses" class="block nav-link bg-white/70 text-indigo-700">Daily Verse</a></li>
+        <li><a href="#tab-wishes" class="block nav-link bg-white/70 text-indigo-700">Wishes</a></li>
+        <li><a href="#tab-prayer" class="block nav-link bg-white/70 text-indigo-700">Prayer</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Floating hearts -->
+  <div class="confetti-heart left-[5%] text-pink-400" style="animation-delay:0s;animation-duration:12s">💖</div>
+  <div class="confetti-heart left-[25%] text-indigo-300" style="animation-delay:4s;animation-duration:15s">✨</div>
+  <div class="confetti-heart left-[45%] text-yellow-300" style="animation-delay:2s;animation-duration:10s">💫</div>
+  <div class="confetti-heart left-[65%] text-pink-500" style="animation-delay:6s;animation-duration:13s">💖</div>
+  <div class="confetti-heart left-[85%] text-indigo-400" style="animation-delay:1s;animation-duration:14s">✨</div>
+
+  <!-- Secret key -->
+  <div id="secret-key" class="fixed top-20 right-4 cursor-pointer z-40 transition-transform duration-300 hover:scale-125">
+    <span class="text-3xl gold-text" title="Click me for a secret message!">🔑</span>
+  </div>
+
+  <!-- MAIN CARD -->
+  <div id="tab-home" class="max-w-5xl w-full mx-auto bg-white rounded-3xl shadow-[0_30px_60px_rgba(255,105,180,0.35)] border-8 border-double border-pink-400 p-6 sm:p-10 lg:p-14 text-center z-20 scroll-reveal">
+
+    <!-- HEADER -->
+    <header class="relative overflow-hidden mb-8 rounded-3xl border-2 border-pink-300 bg-gradient-to-br from-pink-50 via-white to-indigo-50 shadow-[0_30px_60px_rgba(255,105,180,0.25)]">
+      <div class="pointer-events-none absolute inset-0 opacity-30"
+           style="background-image: radial-gradient(60% 60% at 10% 10%, rgba(236,72,153,.35) 0%, transparent 60%),
+                                     radial-gradient(40% 40% at 90% 20%, rgba(99,102,241,.35) 0%, transparent 60%),
+                                     radial-gradient(50% 50% at 50% 100%, rgba(253,224,71,.25) 0%, transparent 60%);">
+      </div>
+
+      <div class="relative z-10 px-6 sm:px-10 py-8 sm:py-10">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full ring-4 ring-pink-200 bg-gradient-to-tr from-pink-400 to-indigo-400 flex items-center justify-center text-2xl">👑</div>
+            <div>
+              <div class="inline-flex items-center gap-2">
+                <span class="heading-font text-2xl sm:text-3xl font-extrabold text-pink-600 sparkle-text">Ivy’s Birthday</span>
+                <span class="px-2.5 py-1 text-xs font-bold rounded-full bg-yellow-200 text-yellow-900 border border-yellow-400">Special</span>
+              </div>
+              <p class="text-sm sm:text-base text-gray-500 -mt-0.5">A day wrapped in joy, glitter, and blessings ✨</p>
+            </div>
+          </div>
+
+          <!-- header music control -->
+          <div class="flex items-center gap-2">
+            <button id="musicToggleBtn"
+              class="group inline-flex items-center gap-2 rounded-full border-2 border-indigo-300 bg-white px-4 py-2 text-indigo-700 font-semibold shadow hover:shadow-md hover:border-indigo-400 transition">
+              <span id="musicToggleIcon">▶️</span>
+              <span id="musicToggleLabel">Play Song</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- one-line title -->
+        <div class="mt-6 sm:mt-8 text-center">
+          <h1 class="heading-font title-ivy font-bold text-pink-600 sparkle-text mb-2 flex justify-center items-center animate-pulse-glow">
+            Happy 35th Birthday, Ivy!
+          </h1>
+          <p class="text-base sm:text-xl md:text-2xl text-indigo-500 font-semibold">
+            May your special day be filled with infinite grace and joy.
+          </p>
+        </div>
+
+        <!-- date/time -->
+        <div id="current-date-time" class="mt-5 text-sm sm:text-lg font-medium text-gray-500 tracking-wider text-center"></div>
+      </div>
+    </header>
+
+    <!-- hidden audio (replace with your MP3 path) -->
+    <audio id="ivyAnthem" preload="auto" src="assets/Song.mp3"></audio>
+
+    <!-- Age Calculation -->
+    <section id="age-calculation" class="mb-10 p-5 bg-yellow-50 rounded-xl shadow-inner border-2 border-yellow-300 scroll-reveal"></section>
+
+    <!-- Countdown -->
+    <section id="next-birthday-countdown" class="mb-10 p-4 bg-indigo-50 rounded-xl border-2 border-indigo-300 shadow-md scroll-reveal">
+      <h3 class="font-bold text-lg text-indigo-700 mb-2">Countdown to 30 September (next year):</h3>
+      <div id="countdown-display" class="text-3xl font-extrabold text-pink-600">--</div>
+    </section>
+
+    <!-- Carousel (NOT CROPPED) -->
+    <div id="photo-carousel" class="relative mb-12 scroll-reveal">
+      <div id="carousel-images"
+           class="relative overflow-hidden rounded-2xl shadow-xl border-4 border-pink-200
+                  aspect-[4/3] md:aspect-video bg-white">
+      </div>
+      <div id="carousel-indicators" class="absolute bottom-4 left-0 right-0 flex justify-center space-x-2"></div>
+      <p class="text-sm text-gray-500 mt-2">*Featuring some of the best moments from the past year!</p>
+    </div>
+
+    <!-- Appreciation + Typewriter -->
+    <section class="mb-12 bg-pink-50 p-6 sm:p-8 rounded-2xl border-l-8 border-pink-400 shadow-lg scroll-reveal">
+      <h2 class="heading-font text-3xl sm:text-4xl font-extrabold text-indigo-700 mb-4 flex items-center justify-center">
+        <span class="mr-2 gold-text">🌟</span> Why You Are So Special
+      </h2>
+      <p id="appreciation-text" class="text-lg text-gray-700 leading-relaxed text-left opacity-0 transition duration-500">
+        Ivy, you possess a rare light that makes the world better. It's not just your incredible intelligence or your drive to succeed; it's the quiet strength you show when facing challenges, the effortless way you make everyone feel seen and valued, and your truly infectious laugh. You approach life with such genuine kindness and curiosity. You are a constant reminder that beauty comes from within, and that heart is always the most valuable asset.
+      </p>
+    </section>
+
+    <!-- Envelopes -->
+    <section id="tab-messages" class="mb-12 bg-yellow-50 p-6 sm:p-8 rounded-2xl border-t-8 border-yellow-400 shadow-2xl scroll-reveal">
+      <h2 class="heading-font text-3xl sm:text-4xl font-extrabold text-pink-700 mb-6">Special Messages to Open All Year</h2>
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="envelope-card p-4 bg-white rounded-xl shadow-md border-b-4 border-pink-500 cursor-pointer hover:bg-pink-100 transition" data-message-id="joy">
+          <span class="text-4xl block mb-2">😊</span><p class="font-bold text-pink-600">Open When You Need Joy</p>
+        </div>
+        <div class="envelope-card p-4 bg-white rounded-xl shadow-md border-b-4 border-indigo-500 cursor-pointer hover:bg-indigo-100 transition" data-message-id="strength">
+          <span class="text-4xl block mb-2">💪</span><p class="font-bold text-indigo-600">Open When You Need Strength</p>
+        </div>
+        <div class="envelope-card p-4 bg-white rounded-xl shadow-md border-b-4 border-yellow-500 cursor-pointer hover:bg-yellow-100 transition" data-message-id="missed">
+          <span class="text-4xl block mb-2">💔</span><p class="font-bold text-yellow-600">Open When You Miss Me</p>
+        </div>
+        <div class="envelope-card p-4 bg-white rounded-xl shadow-md border-b-4 border-red-500 cursor-pointer hover:bg-red-100 transition" data-message-id="best">
+          <span class="text-4xl block mb-2">✨</span><p class="font-bold text-red-600">Open When You Are Your Best</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Superpowers -->
+    <section id="tab-powers" class="mb-12 bg-white p-6 sm:p-8 rounded-2xl border-2 border-indigo-200 shadow-2xl scroll-reveal">
+      <h2 class="heading-font text-3xl sm:text-4xl font-extrabold text-pink-700 mb-6">Ivy's Top 5 Superpowers</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 text-left">
+        <div class="p-4 bg-indigo-50 rounded-xl shadow-md border-b-4 border-indigo-300">
+          <p class="font-bold text-indigo-600 flex items-center mb-1"><span class="mr-2 text-xl">💡</span> Unmatched Wisdom</p>
+          <p class="text-sm text-gray-600">Your ability to offer perspective and guidance is invaluable to everyone around you.</p>
+        </div>
+        <div class="p-4 bg-pink-50 rounded-xl shadow-md border-b-4 border-pink-300">
+          <p class="font-bold text-pink-600 flex items-center mb-1"><span class="mr-2 text-xl">🛡️</span> Inner Strength</p>
+          <p class="text-sm text-gray-600">You face every obstacle with grace and resilience, inspiring us all.</p>
+        </div>
+        <div class="p-4 bg-yellow-50 rounded-xl shadow-md border-b-4 border-yellow-300">
+          <p class="font-bold text-yellow-600 flex items-center mb-1"><span class="mr-2 text-xl">☀️</span> Infectious Joy</p>
+          <p class="text-sm text-gray-600">You light up every room you enter and make every moment fun.</p>
+        </div>
+        <div class="p-4 bg-indigo-50 rounded-xl shadow-md border-b-4 border-indigo-300">
+          <p class="font-bold text-indigo-600 flex items-center mb-1"><span class="mr-2 text-xl">💞</span> Generous Heart</p>
+          <p class="text-sm text-gray-600">You give selflessly and care deeply for the well-being of others.</p>
+        </div>
+        <div class="p-4 bg-pink-50 rounded-xl shadow-md border-b-4 border-pink-300">
+          <p class="font-bold text-pink-600 flex items-center mb-1"><span class="mr-2 text-xl">✨</span> Genuine Authenticity</p>
+          <p class="text-sm text-gray-600">You are true to yourself, which is the rarest and most beautiful quality of all.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Daily Verse -->
+    <section id="tab-verses" class="mb-12 p-6 sm:p-8 rounded-2xl bg-white border-8 border-double border-indigo-300 shadow-2xl scroll-reveal">
+      <h2 class="heading-font text-3xl sm:text-4xl font-extrabold text-indigo-700 mb-6 flex items-center justify-center">
+        <span class="mr-2 text-4xl gold-text">🗓️</span> Your Daily Promise
+      </h2>
+      <div id="daily-verse-display" class="verse-card bg-pink-50 p-6 rounded-xl shadow-inner border border-pink-300 mb-8 transition duration-500">
+        <p id="daily-verse-text" class="text-xl italic text-gray-800 leading-relaxed">Loading your verse for today...</p>
+        <p id="daily-verse-reference" class="text-sm font-semibold text-pink-600 mt-3"></p>
+      </div>
+      <h3 class="font-bold text-xl text-gray-700 mb-4">Having a Bad Day? Read This:</h3>
+      <button id="bad-day-btn" class="w-full sm:w-2/3 mx-auto bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-full transition transform hover:scale-[1.05] text-lg uppercase">
+        <span class="mr-2">🛡️</span> Find Strength Now
+      </button>
+      <p class="mt-4 text-sm text-gray-500">*Click the button above for an instant word of perseverance and encouragement.</p>
+    </section>
+
+    <!-- Wishes -->
+    <section id="tab-wishes" class="mb-12 p-6 sm:p-8 rounded-2xl bg-gray-50 border border-gray-200 shadow-inner scroll-reveal">
+      <h2 class="heading-font text-3xl sm:text-4xl font-extrabold text-indigo-700 mb-4">Make a Wish for Your 35th Year!</h2>
+      <div id="wish-form" class="max-w-md mx-auto">
+        <input type="text" id="wish-input" placeholder="Type your biggest birthday wish here..." class="w-full p-3 mb-4 border-2 border-pink-300 rounded-lg focus:outline-none focus:ring-4 focus:ring-pink-200">
+        <button id="submit-wish-btn" class="w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 rounded-lg transition transform hover:scale-[1.02]">
+          Submit Wish & Receive Blessing!
+        </button>
+      </div>
+      <p id="wish-message" class="mt-4 text-xl font-semibold text-green-600 hidden">
+        Your wish has been received! May all your hopes come true this year! ✨
+      </p>
+    </section>
+
+    <!-- Appreciation (letter) -->
+    <section class="mb-12 bg-indigo-50 p-6 sm:p-8 rounded-2xl border-r-8 border-indigo-400 shadow-lg scroll-reveal">
+      <h2 class="heading-font text-3xl sm:text-4xl font-extrabold text-pink-700 mb-4 flex items-center justify-center">
+        <span class="mr-2 text-2xl">💌</span> Our Deepest Appreciation
+      </h2>
+      <p class="text-lg text-gray-700 leading-relaxed text-left">
+        Thank you for simply being you. Every day with you is a gift we cherish. We appreciate your unwavering support, your brilliant perspective on things, and your ability to bring joy even to mundane moments. You inspire us to be kinder, work harder, and laugh more often. Knowing we have you in our lives is the greatest comfort and the highest honor. We love you more than words can say.
+      </p>
+    </section>
+
+    <!-- Prayer -->
+    <section id="tab-prayer" class="p-6 sm:p-10 rounded-2xl shadow-2xl text-white scroll-reveal" style="background:linear-gradient(135deg,#1e40af 0%,#3730a3 100%)">
+      <h2 class="heading-font text-4xl sm:text-5xl font-extrabold mb-4" style="text-shadow:1px 1px 5px rgba(0,0,0,.8)">A Prayer for Your New Year</h2>
+      <p class="text-xl sm:text-2xl font-light italic leading-relaxed">
+        "Ivy, no matter where life takes you, remember the power of faith and peace.
+        <span class="block mt-4 font-bold tracking-wider gold-text text-3xl">Always Pray.</span>
+        Let it be your constant strength, your quiet sanctuary, and the source of all your joy. May God bless your every step."
+      </p>
+    </section>
+  </div>
+
+  <!-- Message Modal -->
+  <div id="message-modal" class="modal fixed inset-0 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 max-w-lg w-full text-center shadow-2xl relative border-8 border-double border-pink-400">
+      <button id="close-modal-btn" class="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-3xl font-light leading-none">&times;</button>
+      <h3 id="modal-title" class="heading-font text-3xl font-bold text-pink-600 mb-4"></h3>
+      <p id="modal-content" class="text-lg text-gray-700 leading-relaxed whitespace-pre-wrap"></p>
+    </div>
+  </div>
+
+  <!-- MUSIC CONSENT MODAL -->
+  <div id="music-consent-modal" class="modal fixed inset-0 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl relative border-8 border-double border-indigo-300">
+      <h3 class="heading-font text-2xl sm:text-3xl font-bold text-indigo-700 mb-3">Play Ivy’s Song?</h3>
+      <p class="text-gray-700 mb-6">Would you like to play the birthday song while you browse?</p>
+      <div class="flex items-center justify-center gap-4">
+        <button id="music-consent-yes" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2.5 px-5 rounded-full transition">Yes, play 🎵</button>
+        <button id="music-consent-no"  class="bg-gray-100 hover:bg-gray-200 text-gray-800 font-semibold py-2.5 px-5 rounded-full transition border border-gray-300">No thanks</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Footer -->
+  <footer class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur py-3 px-6 text-center text-sm text-gray-600 border-t border-gray-200">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+      <p>&copy; Made with love. 💖</p>
+      <div class="hidden sm:flex space-x-4">
+        <a href="#tab-messages" class="text-indigo-600 hover:text-pink-600 transition">Messages</a>
+        <a href="#tab-prayer" class="text-indigo-600 hover:text-pink-600 transition">Prayer</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ===== Splash gate =====
+    const introOverlay    = document.getElementById('intro-overlay');
+    const introExploreBtn = document.getElementById('intro-explore-btn');
+
+    function showMusicConsent() {
+      const modal = document.getElementById('music-consent-modal');
+      const audio = document.getElementById('ivyAnthem');
+      if (modal && audio && audio.getAttribute('src')) {
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+      }
+    }
+
+    function closeIntroAndStart() {
+      if (!introOverlay) return;
+      introOverlay.classList.add('opacity-0','pointer-events-none');
+      setTimeout(() => {
+        introOverlay.remove();
+        document.body.style.overflow = ''; // re-enable scroll
+        showMusicConsent();
+      }, 450);
+    }
+
+    if (introOverlay && introExploreBtn) {
+      window.addEventListener('load', () => { document.body.style.overflow='hidden'; });
+      introExploreBtn.addEventListener('click', closeIntroAndStart);
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Enter' && document.body.contains(introOverlay)) closeIntroAndStart();
+      });
+    }
+
+    // ====== CONFIG ======
+    const IVY_BIRTHDATE   = new Date('1990-09-30T00:00:00');
+    const NEXT_BDAY_MONTH = 8; // September (0-indexed)
+    const NEXT_BDAY_DAY   = 30;
+
+    // Put your images here (you can add more)
+    const CAROUSEL_IMAGES = [
+      { src: 'assets/photos/IMG_1278.JPG', pos: 'center' },
+      { src: 'assets/photos/IMG_1279.JPG', pos: 'center' },
+      { src: 'assets/photos/IMG_1280.JPG', pos: 'center' }
+    ];
+
+    // ====== Elements ======
+    const appreciationTextEl = document.getElementById('appreciation-text');
+    const dailyVerseTextEl   = document.getElementById('daily-verse-text');
+    const dailyVerseRefEl    = document.getElementById('daily-verse-reference');
+    const badDayBtn          = document.getElementById('bad-day-btn');
+    const modal              = document.getElementById('message-modal');
+    const modalTitle         = document.getElementById('modal-title');
+    const modalContent       = document.getElementById('modal-content');
+    const closeModalBtn      = document.getElementById('close-modal-btn');
+    const secretKey          = document.getElementById('secret-key');
+
+    const ivyAnthem          = document.getElementById('ivyAnthem');
+    const musicToggleBtn     = document.getElementById('musicToggleBtn');
+    const musicToggleIcon    = document.getElementById('musicToggleIcon');
+    const musicToggleLabel   = document.getElementById('musicToggleLabel');
+    const musicConsentModal  = document.getElementById('music-consent-modal');
+
+    const navToggle          = document.getElementById('navToggle');
+    const mobileDrawer       = document.getElementById('mobileDrawer');
+
+    // ====== Nav mobile toggle ======
+    navToggle?.addEventListener('click', () => mobileDrawer.classList.toggle('hidden'));
+    mobileDrawer?.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileDrawer.classList.add('hidden')));
+
+    // Active nav link highlight on scroll
+    const sections = ['#tab-home','#tab-messages','#tab-powers','#tab-verses','#tab-wishes','#tab-prayer'].map(s=>document.querySelector(s));
+    const navLinks = document.querySelectorAll('.nav-link');
+    function setActiveNav(){
+      let idx=0, fromTop=window.scrollY+100;
+      sections.forEach((sec,i)=>{ if(sec && sec.offsetTop <= fromTop) idx=i; });
+      navLinks.forEach(l=>l.classList.remove('active'));
+      const targetId = sections[idx]?.id;
+      navLinks.forEach(l => { if(l.getAttribute('href') === `#${targetId}`) l.classList.add('active'); });
+    }
+    window.addEventListener('scroll', setActiveNav); setActiveNav();
+
+    // ====== Date/Time ======
+    function updateDateTime(){
+      const el=document.getElementById('current-date-time');
+      const now=new Date();
+      const dateOptions={weekday:'long', year:'numeric', month:'long', day:'numeric'};
+      const timeOptions={hour:'2-digit', minute:'2-digit', second:'2-digit'};
+      el.innerHTML = `<span class="text-pink-600 font-semibold">Today:</span> ${now.toLocaleDateString('en-US',dateOptions)} | <span class="text-indigo-600 font-semibold">Time:</span> ${now.toLocaleTimeString('en-US',timeOptions)}`;
+    }
+
+    // ====== Age (days lived) ======
+    function updateAgeCalculation(){
+      const ageElement=document.getElementById('age-calculation');
+      const now=new Date();
+      const MS_PER_DAY=24*60*60*1000;
+      const diffMs=now - IVY_BIRTHDATE;
+      const totalDays=Math.floor(diffMs/MS_PER_DAY);
+      const hours=Math.floor((diffMs%MS_PER_DAY)/(1000*60*60));
+      ageElement.innerHTML = `
+        <h2 class="heading-font text-2xl font-bold text-gray-800 mb-4">You have been spreading joy for exactly:</h2>
+        <div class="p-4 sm:p-6 bg-pink-100 rounded-xl shadow-xl border border-pink-300">
+          <p class="text-5xl sm:text-6xl font-extrabold text-indigo-700 tracking-tighter">${totalDays.toLocaleString()}</p>
+          <p class="text-lg font-semibold text-gray-700 mt-2">Incredible Days ${hours>0?`+ ${hours} hrs`:""}</p>
+        </div>`;
+    }
+
+    // ====== Countdown to Sept 30 next year ======
+    function updateBirthdayCountdown(){
+      const out=document.getElementById('countdown-display');
+      const now=new Date();
+      const nextYear=now.getFullYear()+1;
+      let target=new Date(nextYear, NEXT_BDAY_MONTH, NEXT_BDAY_DAY, 0,0,0,0);
+      if(now>=target) target=new Date(nextYear+1, NEXT_BDAY_MONTH, NEXT_BDAY_DAY, 0,0,0,0);
+
+      const MS_HOUR=1000*60*60, MS_DAY=MS_HOUR*24, diff=target-now;
+      const days=Math.max(0, Math.floor(diff/MS_DAY));
+      const hours=Math.max(0, Math.floor((diff%MS_DAY)/MS_HOUR));
+      const pad=n=>String(n).padStart(2,'0');
+      out.textContent = `${days} days, ${pad(hours)} hours`;
+    }
+
+    // ====== Scroll progress ======
+    function updateScrollProgress(){
+      const winScroll=document.documentElement.scrollTop||document.body.scrollTop;
+      const height=document.documentElement.scrollHeight-document.documentElement.clientHeight;
+      const scrolled=(winScroll/height)*100;
+      document.getElementById('scroll-progress').style.width=scrolled+'%';
+    }
+    window.addEventListener('scroll', updateScrollProgress);
+
+    // ====== Intersection reveal + Typewriter ======
+    function typeWriterEffect(el, text){
+      if(el.dataset.typed==='true') return;
+      el.dataset.typed='true';
+      el.textContent=''; el.style.opacity='1';
+      let i=0; (function typing(){ if(i<text.length){ el.textContent+=text.charAt(i++); setTimeout(typing, 35);} })();
+    }
+    const appreciationOriginal = (appreciationTextEl.dataset.original = appreciationTextEl.textContent.trim());
+
+    const revealObserver=new IntersectionObserver((entries,obs)=>{
+      entries.forEach(entry=>{
+        if(entry.isIntersecting){
+          entry.target.classList.add('is-visible');
+          if(entry.target.querySelector('#appreciation-text')){
+            typeWriterEffect(appreciationTextEl, appreciationTextEl.dataset.original);
+          }
+          obs.unobserve(entry.target);
+        }
+      });
+    },{threshold:0.1});
+    document.querySelectorAll('.scroll-reveal').forEach(s=>revealObserver.observe(s));
+
+    // ====== Carousel (object-contain to avoid cropping) ======
+    const carouselImagesEl     = document.getElementById('carousel-images');
+    const carouselIndicatorsEl = document.getElementById('carousel-indicators');
+    let currentSlide = 0;
+
+    function renderCarousel() {
+      if (!carouselImagesEl || !carouselIndicatorsEl) return;
+      carouselImagesEl.innerHTML = '';
+      carouselIndicatorsEl.innerHTML = '';
+
+      CAROUSEL_IMAGES.forEach((item, index) => {
+        const src = typeof item === 'string' ? item : item.src;
+        const pos = typeof item === 'string' ? 'center' : (item.pos || 'center');
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = `Ivy's Birthday Photo ${index + 1}`;
+        img.className = 'absolute inset-0 w-full h-full object-contain bg-white transition-opacity duration-700 ease-in-out rounded-2xl';
+        img.style.objectPosition = pos;             // keep focus area centered
+        img.style.opacity = index === currentSlide ? 1 : 0;
+        carouselImagesEl.appendChild(img);
+
+        const dot = document.createElement('span');
+        dot.className = `w-3 h-3 rounded-full cursor-pointer transition-colors duration-300 ${index === currentSlide ? 'bg-pink-500' : 'bg-gray-300 hover:bg-gray-400'}`;
+        dot.addEventListener('click', () => { currentSlide = index; renderCarousel(); });
+        carouselIndicatorsEl.appendChild(dot);
+      });
+    }
+    function nextSlide() { currentSlide = (currentSlide + 1) % CAROUSEL_IMAGES.length; renderCarousel(); }
+    renderCarousel(); setInterval(nextSlide, 5000);
+
+    // ====== Envelopes Modal ======
+    document.querySelectorAll('.envelope-card').forEach(card=>{
+      card.addEventListener('click', (e)=>{
+        const id=e.currentTarget.getAttribute('data-message-id');
+        const title=e.currentTarget.querySelector('p').textContent.replace('Open ','');
+        modalTitle.textContent=title;
+        const ENVELOPE_MESSAGES = {
+          joy: "Don't forget that life is meant to be enjoyed! Smile, put on your favorite song, and remember how beautiful your energy is. You create sunshine wherever you go.",
+          strength: "You are the strongest person I know. You have navigated mountains and built kingdoms. Look back at how far you've come. You are powerful, capable, and deeply loved. You got this.",
+          missed: "I am sending you the biggest virtual hug right now. Even when we're apart, know that you are always in my thoughts and my heart. Distance means nothing when the bond is this strong.",
+          best: "WOW! I knew you'd crush it. This is exactly why you're a superstar. Never doubt your ability to excel. Go celebrate your wins, big or small!"
+        };
+        modalContent.textContent=ENVELOPE_MESSAGES[id];
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+      });
+    });
+    closeModalBtn.addEventListener('click',()=>{ modal.classList.add('hidden'); modal.classList.remove('flex'); });
+    modal.addEventListener('click', (e)=>{ if(e.target===modal){ modal.classList.add('hidden'); modal.classList.remove('flex'); } });
+
+    // ====== Wishes ======
+    const submitWishBtn=document.getElementById('submit-wish-btn');
+    const wishInput=document.getElementById('wish-input');
+    const wishMessage=document.getElementById('wish-message');
+    const wishForm=document.getElementById('wish-form');
+    submitWishBtn.addEventListener('click', ()=>{
+      if(wishInput.value.trim()!==''){ wishForm.style.display='none'; wishMessage.classList.remove('hidden'); createConfetti(); }
+    });
+
+    // ====== Secret key ======
+    secretKey.addEventListener('click', ()=>{
+      modalTitle.textContent="The Secret Gold Key Message! 🗝️";
+      modalContent.textContent="You found it! This message is just for you, Ivy. You are the most beautiful soul, and your love is the greatest treasure in my life. Never forget that. You are cherished, protected, and loved infinitely. Happy Birthday!";
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+    });
+
+    // ====== Sparkle cursor ======
+    function createSparkle(x,y){
+      const s=document.createElement('div'); s.className='sparkle-dot';
+      const colors=['#FFC72C','#F472B6','#C084FC']; const color=colors[Math.floor(Math.random()*colors.length)];
+      s.style.backgroundColor=color; s.style.left=`${x}px`; s.style.top=`${y}px`;
+      document.body.appendChild(s); setTimeout(()=>s.remove(),800);
+    }
+    document.addEventListener('mousemove', e=>{ if(Math.random()<0.2) createSparkle(e.clientX,e.clientY); });
+    document.addEventListener('touchmove', e=>{ const t=e.touches[0]; createSparkle(t.clientX,t.clientY); });
+
+    // ====== Confetti ======
+    function createConfetti(){
+      const colors=['#f87171','#fcd34d','#a78bfa','#ec4899','#bae6fd'];
+      const confettiCount=60, centerX=window.innerWidth/2, centerY=80;
+      for(let i=0;i<confettiCount;i++){
+        const c=document.createElement('div'); c.className='confetti';
+        c.style.position='fixed'; c.style.width='8px'; c.style.height='8px';
+        c.style.backgroundColor=colors[Math.floor(Math.random()*colors.length)];
+        c.style.left=`${centerX + (Math.random()-0.5)*200}px`;
+        c.style.top=`${centerY}px`;
+        c.style.borderRadius='50%';
+        const duration=(Math.random()*3+2)+'s';
+        const x=`${(Math.random()-0.5)*600}px`;
+        c.style.animation=`fall ${duration} linear forwards`;
+        c.style.setProperty('--x', x);
+        document.body.appendChild(c); setTimeout(()=>c.remove(),5000);
+      }
+    }
+
+    // ====== Daily Verse anchored to birthday ======
+    const BASE_VERSES = [
+  { text:"The LORD is my shepherd; I shall not want.", ref:"Psalm 23:1" },
+  { text:"The LORD is my light and my salvation; whom shall I fear? the LORD is the strength of my life; of whom shall I be afraid?", ref:"Psalm 27:1" },
+  { text:"Wait on the LORD: be of good courage, and he shall strengthen thine heart: wait, I say, on the LORD.", ref:"Psalm 27:14" },
+  { text:"O taste and see that the LORD is good: blessed is the man that trusteth in him.", ref:"Psalm 34:8" },
+  { text:"The LORD is nigh unto them that are of a broken heart; and saveth such as be of a contrite spirit.", ref:"Psalm 34:18" },
+  { text:"Delight thyself also in the LORD; and he shall give thee the desires of thine heart.", ref:"Psalm 37:4" },
+  { text:"Commit thy way unto the LORD; trust also in him; and he shall bring it to pass.", ref:"Psalm 37:5" },
+  { text:"God is our refuge and strength, a very present help in trouble.", ref:"Psalm 46:1" },
+  { text:"Be still, and know that I am God: I will be exalted among the heathen, I will be exalted in the earth.", ref:"Psalm 46:10" },
+  { text:"Create in me a clean heart, O God; and renew a right spirit within me.", ref:"Psalm 51:10" },
+  { text:"In God I will praise his word, in God I have put my trust; I will not fear what flesh can do unto me.", ref:"Psalm 56:4" },
+  { text:"Trust in him at all times; ye people, pour out your heart before him: God is a refuge for us. Selah.", ref:"Psalm 62:8" },
+  { text:"So teach us to number our days, that we may apply our hearts unto wisdom.", ref:"Psalm 90:12" },
+  { text:"He that dwelleth in the secret place of the most High shall abide under the shadow of the Almighty.", ref:"Psalm 91:1" },
+  { text:"I will say of the LORD, He is my refuge and my fortress: my God; in him will I trust.", ref:"Psalm 91:2" },
+  { text:"Bless the LORD, O my soul, and forget not all his benefits.", ref:"Psalm 103:2" },
+  { text:"This is the day which the LORD hath made; we will rejoice and be glad in it.", ref:"Psalm 118:24" },
+  { text:"Thy word is a lamp unto my feet, and a light unto my path.", ref:"Psalm 119:105" },
+  { text:"I will lift up mine eyes unto the hills, from whence cometh my help. My help cometh from the LORD, which made heaven and earth.", ref:"Psalm 121:1-2" },
+  { text:"The LORD hath done great things for us; whereof we are glad.", ref:"Psalm 126:3" },
+  { text:"I will praise thee; for I am fearfully and wonderfully made: marvellous are thy works; and that my soul knoweth right well.", ref:"Psalm 139:14" },
+  { text:"In all thy ways acknowledge him, and he shall direct thy paths.", ref:"Proverbs 3:6" },
+  { text:"Keep thy heart with all diligence; for out of it are the issues of life.", ref:"Proverbs 4:23" },
+  { text:"The liberal soul shall be made fat: and he that watereth shall be watered also himself.", ref:"Proverbs 11:25" },
+  { text:"Heaviness in the heart of man maketh it stoop: but a good word maketh it glad.", ref:"Proverbs 12:25" },
+  { text:"A man's heart deviseth his way: but the LORD directeth his steps.", ref:"Proverbs 16:9" },
+  { text:"A merry heart doeth good like a medicine: but a broken spirit drieth the bones.", ref:"Proverbs 17:22" },
+  { text:"There are many devices in a man's heart; nevertheless the counsel of the LORD, that shall stand.", ref:"Proverbs 19:21" },
+  { text:"Strength and honour are her clothing; and she shall rejoice in time to come.", ref:"Proverbs 31:25" },
+  { text:"She openeth her mouth with wisdom; and in her tongue is the law of kindness.", ref:"Proverbs 31:26" },
+  { text:"Favour is deceitful, and beauty is vain: but a woman that feareth the LORD, she shall be praised.", ref:"Proverbs 31:30" },
+  { text:"Thou wilt keep him in perfect peace, whose mind is stayed on thee: because he trusteth in thee.", ref:"Isaiah 26:3" },
+  { text:"The grass withereth, the flower fadeth: but the word of our God shall stand for ever.", ref:"Isaiah 40:8" },
+  { text:"Fear thou not; for I am with thee: be not dismayed; for I am thy God: I will strengthen thee; yea, I will help thee; yea, I will uphold thee with the right hand of my righteousness.", ref:"Isaiah 41:10" },
+  { text:"When thou passest through the waters, I will be with thee; and through the rivers, they shall not overflow thee: when thou walkest through the fire, thou shalt not be burned; neither shall the flame kindle upon thee.", ref:"Isaiah 43:2" },
+  { text:"And the LORD shall guide thee continually, and satisfy thy soul in drought, and make fat thy bones: and thou shalt be like a watered garden, and like a spring of water, whose waters fail not.", ref:"Isaiah 58:11" },
+  { text:"Blessed is the man that trusteth in the LORD, and whose hope the LORD is.", ref:"Jeremiah 17:7" },
+  { text:"Call unto me, and I will answer thee, and shew thee great and mighty things, which thou knowest not.", ref:"Jeremiah 33:3" },
+  { text:"The LORD is my portion, saith my soul; therefore will I hope in him.", ref:"Lamentations 3:24" },
+  { text:"The LORD is good, a strong hold in the day of trouble; and he knoweth them that trust in him.", ref:"Nahum 1:7" },
+  { text:"The LORD thy God in the midst of thee is mighty; he will save, he will rejoice over thee with joy; he will rest in his love, he will joy over thee with singing.", ref:"Zephaniah 3:17" },
+  { text:"Let your light so shine before men, that they may see your good works, and glorify your Father which is in heaven.", ref:"Matthew 5:16" },
+  { text:"But seek ye first the kingdom of God, and his righteousness; and all these things shall be added unto you.", ref:"Matthew 6:33" },
+  { text:"Ask, and it shall be given you; seek, and ye shall find; knock, and it shall be opened unto you.", ref:"Matthew 7:7" },
+  { text:"Come unto me, all ye that labour and are heavy laden, and I will give you rest.", ref:"Matthew 11:28" },
+  { text:"With men this is impossible; but with God all things are possible.", ref:"Matthew 19:26" },
+  { text:"Lo, I am with you alway, even unto the end of the world. Amen.", ref:"Matthew 28:20" },
+  { text:"If thou canst believe, all things are possible to him that believeth.", ref:"Mark 9:23" },
+  { text:"With men it is impossible, but not with God: for with God all things are possible.", ref:"Mark 10:27" },
+  { text:"For with God nothing shall be impossible.", ref:"Luke 1:37" },
+  { text:"Give, and it shall be given unto you; good measure, pressed down, and shaken together, and running over...", ref:"Luke 6:38" },
+  { text:"Fear not, little flock; for it is your Father's good pleasure to give you the kingdom.", ref:"Luke 12:32" },
+  { text:"And the light shineth in darkness; and the darkness comprehended it not.", ref:"John 1:5" },
+  { text:"I am the light of the world: he that followeth me shall not walk in darkness, but shall have the light of life.", ref:"John 8:12" },
+  { text:"I am come that they might have life, and that they might have it more abundantly.", ref:"John 10:10" },
+  { text:"I am the way, the truth, and the life: no man cometh unto the Father, but by me.", ref:"John 14:6" },
+  { text:"Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.", ref:"John 14:27" },
+  { text:"I am the vine, ye are the branches... for without me ye can do nothing.", ref:"John 15:5" },
+  { text:"Hitherto have ye asked nothing in my name: ask, and ye shall receive, that your joy may be full.", ref:"John 16:24" },
+  { text:"But ye shall receive power, after that the Holy Ghost is come upon you: and ye shall be witnesses unto me...", ref:"Acts 1:8" },
+  { text:"And it shall come to pass, that whosoever shall call on the name of the Lord shall be saved.", ref:"Acts 2:21" },
+  { text:"But God commendeth his love toward us, in that, while we were yet sinners, Christ died for us.", ref:"Romans 5:8" },
+  { text:"There is therefore now no condemnation to them which are in Christ Jesus, who walk not after the flesh, but after the Spirit.", ref:"Romans 8:1" },
+  { text:"For I reckon that the sufferings of this present time are not worthy to be compared with the glory which shall be revealed in us.", ref:"Romans 8:18" },
+  { text:"Nay, in all these things we are more than conquerors through him that loved us.", ref:"Romans 8:37" },
+  { text:"And be not conformed to this world: but be ye transformed by the renewing of your mind...", ref:"Romans 12:2" },
+  { text:"Now the God of patience and consolation grant you to be likeminded one toward another according to Christ Jesus:", ref:"Romans 15:5" },
+  { text:"Eye hath not seen, nor ear heard, neither have entered into the heart of man, the things which God hath prepared for them that love him.", ref:"1 Corinthians 2:9" },
+  { text:"There hath no temptation taken you but such as is common to man: but God is faithful, who will not suffer you to be tempted above that ye are able...", ref:"1 Corinthians 10:13" },
+  { text:"And now abideth faith, hope, charity, these three; but the greatest of these is charity.", ref:"1 Corinthians 13:13" },
+  { text:"For which cause we faint not; but though our outward man perish, yet the inward man is renewed day by day.", ref:"2 Corinthians 4:16" },
+  { text:"For we walk by faith, not by sight.", ref:"2 Corinthians 5:7" },
+  { text:"My grace is sufficient for thee: for my strength is made perfect in weakness.", ref:"2 Corinthians 12:9" },
+  { text:"I am crucified with Christ: nevertheless I live; yet not I, but Christ liveth in me...", ref:"Galatians 2:20" },
+  { text:"For by grace are ye saved through faith; and that not of yourselves: it is the gift of God: not of works, lest any man should boast.", ref:"Ephesians 2:8-9" },
+  { text:"Now unto him that is able to do exceeding abundantly above all that we ask or think, according to the power that worketh in us,", ref:"Ephesians 3:20" },
+  { text:"Finally, my brethren, be strong in the Lord, and in the power of his might.", ref:"Ephesians 6:10" },
+  { text:"Being confident of this very thing, that he which hath begun a good work in you will perform it until the day of Jesus Christ:", ref:"Philippians 1:6" },
+  { text:"Rejoice in the Lord alway: and again I say, Rejoice.", ref:"Philippians 4:4" },
+  { text:"Be careful for nothing; but in every thing by prayer and supplication with thanksgiving let your requests be made known unto God.", ref:"Philippians 4:6" },
+  { text:"And the peace of God, which passeth all understanding, shall keep your hearts and minds through Christ Jesus.", ref:"Philippians 4:7" },
+  { text:"And let the peace of God rule in your hearts, to the which also ye are called in one body; and be ye thankful.", ref:"Colossians 3:15" },
+  { text:"And whatsoever ye do, do it heartily, as to the Lord, and not unto men;", ref:"Colossians 3:23" },
+  { text:"Wherefore comfort yourselves together, and edify one another, even as also ye do.", ref:"1 Thessalonians 5:11" },
+  { text:"Rejoice evermore.", ref:"1 Thessalonians 5:16" },
+  { text:"Pray without ceasing.", ref:"1 Thessalonians 5:17" },
+  { text:"In every thing give thanks: for this is the will of God in Christ Jesus concerning you.", ref:"1 Thessalonians 5:18" },
+  { text:"I have fought a good fight, I have finished my course, I have kept the faith:", ref:"2 Timothy 4:7" },
+  { text:"For the grace of God that bringeth salvation hath appeared to all men,", ref:"Titus 2:11" },
+  { text:"That the communication of thy faith may become effectual by the acknowledging of every good thing which is in you in Christ Jesus.", ref:"Philemon 1:6" },
+  { text:"Let us therefore come boldly unto the throne of grace, that we may obtain mercy, and find grace to help in time of need.", ref:"Hebrews 4:16" },
+  { text:"Let us hold fast the profession of our faith without wavering; (for he is faithful that promised;)", ref:"Hebrews 10:23" },
+  { text:"Now faith is the substance of things hoped for, the evidence of things not seen.", ref:"Hebrews 11:1" },
+  { text:"…let us run with patience the race that is set before us,", ref:"Hebrews 12:1" },
+  { text:"…for he hath said, I will never leave thee, nor forsake thee.", ref:"Hebrews 13:5" },
+  { text:"Jesus Christ the same yesterday, and to day, and for ever.", ref:"Hebrews 13:8" },
+  { text:"My brethren, count it all joy when ye fall into divers temptations;", ref:"James 1:2" },
+  { text:"If any of you lack wisdom, let him ask of God, that giveth to all men liberally, and upbraideth not; and it shall be given him.", ref:"James 1:5" },
+  { text:"Draw nigh to God, and he will draw nigh to you.", ref:"James 4:8" },
+  { text:"Casting all your care upon him; for he careth for you.", ref:"1 Peter 5:7" }
+];
+
+    const BIBLE_VERSES = BASE_VERSES;
+
+    function getBirthdayDayOfYear(){
+      const now=new Date();
+      const currentYearBirthday=new Date(now.getFullYear(), IVY_BIRTHDATE.getMonth(), IVY_BIRTHDATE.getDate());
+      let anchor=currentYearBirthday;
+      if(now<currentYearBirthday){ anchor=new Date(now.getFullYear()-1, IVY_BIRTHDATE.getMonth(), IVY_BIRTHDATE.getDate()); }
+      const diff=now - anchor;
+      return Math.floor(diff/(1000*60*60*24)) + 1; // birthday = Day 1
+    }
+    function getTodaysVerse(){
+      const day=getBirthdayDayOfYear();
+      return { day, verse: BIBLE_VERSES[(day-1)%BIBLE_VERSES.length] };
+    }
+    function displayDailyVerse(){
+      const {day, verse}=getTodaysVerse();
+      dailyVerseTextEl.textContent=verse.text;
+      dailyVerseRefEl.textContent=`(Day ${day}: ${verse.ref})`;
+    }
+    function displayRandomVerse(){
+      const list=BIBLE_VERSES.filter(v=>/Psalm|Isaiah|Philippians|Joshua|Corinthians/.test(v.ref));
+      const arr=list.length>5?list:BIBLE_VERSES;
+      const verse=arr[Math.floor(Math.random()*arr.length)];
+      dailyVerseTextEl.textContent=verse.text;
+      dailyVerseRefEl.textContent=`(A Word for Strength: ${verse.ref})`;
+    }
+    badDayBtn.addEventListener('click', displayRandomVerse);
+
+    // ====== Music: consent + header control ======
+    function updateMusicUI(playing){
+      if(playing){
+        musicToggleIcon.textContent='⏸️';
+        musicToggleLabel.textContent='Pause';
+        musicToggleBtn.classList.remove('border-indigo-300'); musicToggleBtn.classList.add('border-pink-400');
+      }else{
+        musicToggleIcon.textContent='▶️';
+        musicToggleLabel.textContent='Play Song';
+        musicToggleBtn.classList.add('border-indigo-300'); musicToggleBtn.classList.remove('border-pink-400');
+      }
+    }
+    document.getElementById('music-consent-yes')?.addEventListener('click', async ()=>{
+      try{ await ivyAnthem.play(); updateMusicUI(true); createConfetti(); }
+      catch(e){ updateMusicUI(false); console.warn('Audio play blocked:', e); }
+      finally{ musicConsentModal.classList.add('hidden'); musicConsentModal.classList.remove('flex'); }
+    });
+    document.getElementById('music-consent-no')?.addEventListener('click', ()=>{
+      updateMusicUI(false); musicConsentModal.classList.add('hidden'); musicConsentModal.classList.remove('flex');
+    });
+    musicToggleBtn?.addEventListener('click', async ()=>{
+      if(ivyAnthem.paused){
+        try{ await ivyAnthem.play(); updateMusicUI(true); }
+        catch(e){ musicConsentModal.classList.remove('hidden'); musicConsentModal.classList.add('flex'); }
+      } else { ivyAnthem.pause(); updateMusicUI(false); }
+    });
+    ivyAnthem?.addEventListener('ended', ()=>updateMusicUI(false));
+    ivyAnthem?.addEventListener('pause', ()=>updateMusicUI(false));
+    ivyAnthem?.addEventListener('play',  ()=>updateMusicUI(true));
+
+    // ====== Keyboard shortcuts ======
+    document.addEventListener('keyup', (e)=>{
+      if(e.key==='c' || e.key==='C'){ createConfetti(); }
+      else if(e.key==='n' || e.key==='N'){ nextSlide(); }
+      else if(e.key==='m' || e.key==='M'){
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+        modalTitle.textContent="Keyboard Shortcuts";
+        modalContent.textContent="C: Confetti\nN: Next Photo\nK: Secret Key Message";
+      } else if(e.key==='k' || e.key==='K'){ secretKey.click(); }
+    });
+
+    // ====== Init + intervals ======
+    function boot(){
+      updateDateTime(); updateAgeCalculation(); updateBirthdayCountdown(); displayDailyVerse(); setActiveNav();
+    }
+    boot();
+    setInterval(updateDateTime, 1000);
+    setInterval(updateAgeCalculation, 1000*60*60);     // hourly
+    setInterval(updateBirthdayCountdown, 1000*60*10);  // every 10 minutes is enough
+  </script>
+</body>
+</html>
